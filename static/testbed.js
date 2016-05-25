@@ -18,8 +18,9 @@ window.TestBed = (function () {
     }
   })()
 
-  function updateStatus (content) {
+  function updateStatus (content, f) {
     status.textContent = content
+    if (f) f(status)
   }
 
   function saveCache (files) {
@@ -42,6 +43,18 @@ window.TestBed = (function () {
       updateStatus('received ' + files.length + ' files.')
       var filteredFiles = filterFiles(files)
       requireFile(filteredFiles, 0, function () {
+        updateStatus('ran ' + filteredFiles.length + ' out of ' + files.length + ' files. ', function (el) {
+          if (filteredFiles.length < files.length) {
+            var link = document.createElement('a')
+            link.href = 'javascript://runAll'
+            link.textContent = 'run all'
+            link.onclick = function () {
+              window.sessionStorage.testFiles = ''
+              window.location.reload()
+            }
+            el.appendChild(link)
+          }
+        })
         mocha.run()
       })
     }
@@ -52,16 +65,17 @@ window.TestBed = (function () {
       return file.name
     }).join(';;'))
     window.sessionStorage.testFiles = nextFiles
-    location.reload()
+    window.location.reload()
   }
 
   function filterFiles (files) {
     var filter = window.sessionStorage.testFiles || ''
     if (!filter) return files
     var applicable = filter.split(';;')
-    return files.filter(function (file) {
+    var filteredFiles = files.filter(function (file) {
       return applicable.indexOf(file.name) >= 0
     })
+    return filteredFiles.length ? filteredFiles : files
   }
 
   function requireFile (files, index, onFinish) {
@@ -74,7 +88,6 @@ window.TestBed = (function () {
           requireFile(files, index + 1, onFinish)
         })
       } else {
-        updateStatus('finished requiring files.')
         onFinish()
       }
     })
@@ -84,7 +97,7 @@ window.TestBed = (function () {
     receiveContext: function (context) {
       var files = [ ]
       context.keys().forEach(function (key) {
-        files.push({ file: key, fn: context(key) })
+        files.push({ name: key, fn: context(key) })
       })
       go(files)
     }
