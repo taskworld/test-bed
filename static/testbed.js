@@ -1,7 +1,6 @@
 /* global mocha */
 
 window.TestBed = (function () {
-  var _files
   var _cache
   var status = document.querySelector('#testbed-status')
 
@@ -82,16 +81,12 @@ window.TestBed = (function () {
   }
 
   return {
-    register: function (receiveFiles) {
-      if (_files) throw new Error('register in register!!')
-      _files = [ ]
-      receiveFiles()
-      var files = _files
-      _files = null
+    receiveContext: function (context) {
+      var files = [ ]
+      context.keys.forEach(function (key) {
+        files.push({ file: key, fn: context(key) })
+      })
       go(files)
-    },
-    handleFile: function (name, fn) {
-      _files.push({ name: name, fn: fn })
     }
   }
 })()

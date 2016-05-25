@@ -9,6 +9,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "bin": {
+    "test-bed": "./index.js"
+  },
   "dependencies": {
     "express": "^4.13.4",
     "mocha": "^2.5.2",
