@@ -83,7 +83,7 @@ window.TestBed = (function () {
   return {
     receiveContext: function (context) {
       var files = [ ]
-      context.keys.forEach(function (key) {
+      context.keys().forEach(function (key) {
         files.push({ file: key, fn: context(key) })
       })
       go(files)
