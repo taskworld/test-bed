@@ -1,7 +1,6 @@
-/* global mocha */
-
 window.TestBed = (function () {
   var _cache
+  var _run
   var status = document.querySelector('#testbed-status')
 
   var maybeFrame = (function () {
@@ -43,7 +42,7 @@ window.TestBed = (function () {
       updateStatus('received ' + files.length + ' files.')
       var filteredFiles = filterFiles(files)
       requireFile(filteredFiles, 0, function () {
-        updateStatus('ran ' + filteredFiles.length + ' out of ' + files.length + ' files. ', function (el) {
+        updateStatus('ran ' + filteredFiles.length + (filteredFiles.length < files.length ? ' affected' : '') + ' spec files. ', function (el) {
           if (filteredFiles.length < files.length) {
             var link = document.createElement('a')
             link.href = 'javascript://runAll'
@@ -55,7 +54,11 @@ window.TestBed = (function () {
             el.appendChild(link)
           }
         })
-        mocha.run()
+        if (_run) {
+          _run()
+        } else {
+          error('Not properly setup. Please call TestBed.setup().')
+        }
       })
     }
   }
@@ -83,7 +86,12 @@ window.TestBed = (function () {
     maybeFrame(function () {
       if (current) {
         updateStatus('is requiring ' + current.name + ' (' + (index + 1) + '/' + files.length + ')...')
-        current.fn()
+        try {
+          current.fn()
+        } catch (e) {
+          updateStatus('failed to require ' + current.name + ': ' + e)
+          throw e
+        }
         maybeFrame(function () {
           requireFile(files, index + 1, onFinish)
         })
@@ -93,8 +101,20 @@ window.TestBed = (function () {
     })
   }
 
+  function error (message) {
+    updateStatus('errored: ' + message)
+    throw new Error(message)
+  }
+
   return {
+    setup: function (options) {
+      if (typeof options.run !== 'function') {
+        error('Required: options.run')
+      }
+      _run = options.run
+    },
     receiveContext: function (context) {
+      console.log('Receiving context...', context)
       var files = [ ]
       context.keys().forEach(function (key) {
         files.push({ name: key, fn: context(key) })

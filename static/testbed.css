@@ -1,8 +1,19 @@
 
+body {
+  margin: 0;
+}
+
 #testbed {
   font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
-  padding: 20px;
   background: #38A2A9;
+  height: 70px;
+}
+
+#testbed-sticky {
+  height: 30px;
+  position: fixed;
+  top: 0; right: 0; left: 0;
+  padding: 20px;
 }
 
 #testbed a {
