@@ -94,6 +94,48 @@ For running in CI servers, we use Karma which works perfectly fine!
 4. Run `./node_modules/.bin/test-bed` and go to `http://localhost:9011/`
 
 
+## Appendix: How it works...
+
+- First, test-bed fires up webpack-dev-middleware, which puts webpack in watch mode using memory file system.
+
+  webpack also builds a module graph.
+  Each module has a unique “ID” number (which can be accessed from client code). 
+
+  <p align="center"><img src="http://i.imgur.com/WBbVQ8F.png" width="700" /></p>
+
+  Notice the “context module.” [It is created when you use `require.context()`](https://webpack.github.io/docs/context.html#require-context). This allows you to require files in bulk, and also allows you to use expressions in require statements ([webpack creates a context module automatically](https://webpack.github.io/docs/context.html#dynamic-requires)).
+
+  (Another note: There is a dashed line from test-bed runtime to the context module, because the test entry sent the context module to the runtime (via `TestBed.run({ context: ... })`).)
+
+  It also contains other useful information, such as the list of modules names inside this context and the corresponding “module IDs,” summarized in a table below. 
+
+  <p align="center"><img src="http://i.imgur.com/kgni6zU.png" width="700" /></p>
+
+- Now let’s consider what happens when I changed a module.
+
+  <p align="center"><img src="http://i.imgur.com/Gdi5LHc.png" width="700" /></p>
+  
+  - I edited `add.js`.
+
+  - webpack picks up the change and rebuilds the bundle. Only modules that are changed needs to be “rebuilt,” while the rest comes from cache.
+
+  - Once the bundle is rebuilt, webpack announces a [“stats” object](https://webpack.github.io/docs/node.js-api.html#stats), which contains the build stats, including which modules are rebuilt and which are not.
+
+- test-bed server picks up the stats object and walks the dependency graph to obtain the “affected modules.”
+
+  <p align="center"><img src="http://i.imgur.com/mJPTpRu.png" width="700" /></p>
+
+- test-bed server sends the affected modules to the runtime in the client.
+
+  - The client saves the information and reload the page, thus gives us a pristine test environment, as well as access to the new bundle.
+
+  <p align="center"><img src="http://i.imgur.com/wqHgm3m.png" width="700" /></p>
+
+- The runtime looks at the context module, and figures out which files to run. Finally, it requires just the affected test files, and starts the test.
+
+  <p align="center"><img src="http://i.imgur.com/JoPVabE.png" width="700" /></p>
+
+
 ## Appendix: How we tripled our test speed with this one weird trick.
 
 As our application grows, we notice that our test starts running slower and slower.
