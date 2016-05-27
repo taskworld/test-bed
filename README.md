@@ -7,6 +7,7 @@ It only executes run test files that are affected by the code change.
 This project is only meant to improve the developer experience.
 It is not for running tests inside a CI.
 For that purpose, you should use something like Karma.
+(We use both: test-bed for TDD, Karma for CI)
 
 
 ## Overview
