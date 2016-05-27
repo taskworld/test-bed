@@ -28,5 +28,16 @@
   },
   "peerDependencies": {
     "webpack": "1 || ^2.1.0-beta.7"
-  }
+  },
+  "directories": {
+    "example": "example"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taskworld/test-bed.git"
+  },
+  "bugs": {
+    "url": "https://github.com/taskworld/test-bed/issues"
+  },
+  "homepage": "https://github.com/taskworld/test-bed#readme"
 }
