@@ -92,3 +92,45 @@ For running in CI servers, we use Karma which works perfectly fine!
     ```
 
 4. Run `./node_modules/.bin/test-bed` and go to `http://localhost:9011/`
+
+
+## Appendix: How we tripled our test speed with this one weird trick.
+
+As our application grows, we notice that our test starts running slower and slower.
+__We found out that in our React component tests, we mounted the component but didn’t unmount it!__
+
+This causes hundreds of components that connects to a several legacy global stores to re-render itself, which slows each test down by ~0.5 seconds.
+
+The solution? We monkey-patched ReactDOM so that we can keep track of all the mounted instance, and unmount them all before starting the next test. This also forces to keep all tests isolated.
+
+```js
+// spec-helper.js
+import ride from 'ride'
+
+const cleanupPreviouslyMountedComponent = (() => {
+  let _mountedContainers = [ ]
+
+  ride(ReactDOM, 'render', (render) => function (element, node) {
+    const component = render.apply(this, arguments)
+    _mountedContainers.push(node)
+    return component
+  })
+
+  return () => {
+    const containersToCleanUp = _mountedContainers
+    if (!containersToCleanUp.length) return
+    for (const container of containersToCleanUp) {
+      try {
+        ReactDOM.unmountComponentAtNode(container)
+      } catch (e) {
+        console.error('[spec-helpers] Cannot unmount component:', e)
+      }
+    }
+    _mountedContainers = [ ]
+  }
+})()
+
+beforeEach(function () {
+  cleanupPreviouslyMountedComponent()
+})
+```
