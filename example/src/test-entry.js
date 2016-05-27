@@ -19,7 +19,7 @@
 // Setup TestBed
 TestBed.run({
   context: require.context('.', true, /\.spec\.js$/),
-  runTests () {
-    mocha.run()
-  }
+  runTests: () => new Promise((resolve, reject) => {
+    mocha.run((err) => resolve())
+  })
 })

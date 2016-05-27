@@ -19,27 +19,31 @@ window.TestBed = (function () {
 
   function updateStatus (content, f) {
     status.textContent = content
-    if (f) f(status)
   }
 
-  function loadTestFiles (files, affectedModuleIds, runTests) {
+  function loadTestFiles (files, onFinishLoading) {
     updateStatus('received ' + files.length + ' files.')
-    var filteredFiles = filterFiles(files, affectedModuleIds)
-    requireFile(filteredFiles, 0, function () {
-      updateStatus('ran ' + filteredFiles.length + (filteredFiles.length < files.length ? ' affected' : '') + ' spec files. ', function (el) {
-        if (filteredFiles.length < files.length) {
-          var link = document.createElement('a')
-          link.href = 'javascript://runAll'
-          link.textContent = 'run all'
-          link.onclick = function () {
-            window.sessionStorage.testFiles = ''
-            window.location.reload()
+    requireFile(0, onFinishLoading)
+
+    function requireFile (index, onFinish) {
+      var current = files[index]
+      maybeFrame(function () {
+        if (current) {
+          updateStatus('is requiring ' + current.name + ' (' + (index + 1) + '/' + files.length + ')...')
+          try {
+            current.fn()
+          } catch (e) {
+            updateStatus('failed to require ' + current.name + ': ' + e)
+            throw e
           }
-          el.appendChild(link)
+          maybeFrame(function () {
+            requireFile(index + 1, onFinish)
+          })
+        } else {
+          onFinish()
         }
       })
-      runTests()
-    })
+    }
   }
 
   function filterFiles (files, affectedModuleIds) {
@@ -47,26 +51,6 @@ window.TestBed = (function () {
       return affectedModuleIds.indexOf(file.id) >= 0
     })
     return filteredFiles.length ? filteredFiles : files
-  }
-
-  function requireFile (files, index, onFinish) {
-    var current = files[index]
-    maybeFrame(function () {
-      if (current) {
-        updateStatus('is requiring ' + current.name + ' (' + (index + 1) + '/' + files.length + ')...')
-        try {
-          current.fn()
-        } catch (e) {
-          updateStatus('failed to require ' + current.name + ': ' + e)
-          throw e
-        }
-        maybeFrame(function () {
-          requireFile(files, index + 1, onFinish)
-        })
-      } else {
-        onFinish()
-      }
-    })
   }
 
   function error (message) {
@@ -94,9 +78,31 @@ window.TestBed = (function () {
 
       var files = getSpecFilesFromContext(options.context)
       var affectedModuleIds = getAffectedModuleIdsFromLastRun()
+      var filteredFiles = filterFiles(files, affectedModuleIds)
+      var filesStatString = filteredFiles.length + (filteredFiles.length < files.length ? ' affected' : '') + ' spec files'
 
-      loadTestFiles(files, affectedModuleIds, () => {
-        options.runTests()
+      if (filteredFiles.length < files.length) {
+        addAction('run all', function () {
+          window.sessionStorage.TestBedWebpackCompileResult = ''
+          window.location.reload()
+        })
+      }
+
+      loadTestFiles(filteredFiles, function () {
+        updateStatus('started running ' + filesStatString)
+        const promise = options.runTests()
+        if (typeof promise.then !== 'function') {
+          updateStatus('warns: options.runTests() did not return a promise')
+          return
+        }
+        promise.then(
+          function () {
+            updateStatus('ran ' + filesStatString)
+          },
+          function (e) {
+            updateStatus('finished test with error: ' + String(e))
+          }
+        )
       })
 
       function getSpecFilesFromContext (context) {
@@ -113,6 +119,14 @@ window.TestBed = (function () {
         })()
         if (!lastRunResult) return [ ]
         return lastRunResult.affectedModuleIds || [ ]
+      }
+
+      function addAction (text, onClick) {
+        var link = document.createElement('a')
+        link.href = 'javascript://runAll'
+        link.textContent = 'run all'
+        link.onclick = onClick
+        document.getElementById('testbed-actions').appendChild(link)
       }
     }
   }

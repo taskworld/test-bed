@@ -1,2 +1,2 @@
 
-export default (a, b) => a * a
+export default (a, b) => a * b
