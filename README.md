@@ -53,11 +53,17 @@ For running in CI servers, we use Karma which works perfectly fine!
 
 ## How to use it?
 
-1. Create a `webpack.config.test-bed.js` with your webpack configuration.
+1. Install test-bed.
+
+    ```
+    npm install --save-dev test-bed
+    ```
+
+2. Create a `webpack.config.test-bed.js` with your webpack configuration.
 
     - `entry` should be set to the test entry file. For example, `./test-entry.js`.
 
-2. Create a test entry file, which sets up the testing environment and sends the test context to TestBed:
+3. Create a test entry file, which sets up the testing environment and sends the test context to TestBed:
 
     ```js
     // ./test-entry.js
@@ -85,4 +91,4 @@ For running in CI servers, we use Karma which works perfectly fine!
     })
     ```
 
-3. Run `test-bed` and go to `http://localhost:9011/`
+4. Run `./node_modules/.bin/test-bed` and go to `http://localhost:9011/`
