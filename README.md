@@ -29,23 +29,31 @@ Powered by `webpack-hot-middleware`, an overlay will be displayed when there is 
 
 <p align="center"><img src="http://i.imgur.com/3vFd6TM.png" width="836" /></p>
 
+If you’ve set up code coverage instrumentation (e.g. using [babel-plugin-\_\_coverage\_\_](https://github.com/dtinth/babel-plugin-__coverage__)), then `test-bed` will generate a coverage report file (`lcov.info`) so that you can [integrate coverage measurement into your text editor](https://atom.io/packages/atom-lcov)!
+
+<p align="center"><img src="http://i.imgur.com/9kOSk6m.png" width="849" /></p>
+
 
 
 ## Why?
+
+At Taskworld, our front-end, as well as our test suite, is growing quickly. Now we have hundreds of test files…
 
 We’ve been using Karma with webpack, and there are some pain points:
 
 - Karma does not load eval’d source maps.
 
-- Karma’s reporter on console is harder to read, compared to Mocha’s HTML reporter.
+- Karma’s reporter on console is harder to read, when compared to Mocha’s HTML reporter.
 
-- When running tests for the first time, Karma will run the whole suite which takes quite a long time for Taskworld’s codebase, which is quite big. You need to open a new terminal tab and invoke `karma run -- --grep=MyModule` later to limit the scope of the test. And it doesn’t survive restarts.
+- When running tests for the first time, Karma will always run the whole suite. It takes quite a long time for Taskworld’s codebase (which is quite big). You need to open a new terminal tab and invoke `karma run -- --grep=MyModule` later to limit the scope of the test. And it doesn’t survive restarts.
+
+For running in CI servers, we use Karma which works perfectly fine!
 
 
 
-## How to use?
+## How to use it?
 
-1. Create a `webpack.config.test-bed.js` with a webpack configuration.
+1. Create a `webpack.config.test-bed.js` with your webpack configuration.
 
     - `entry` should be set to the test entry file. For example, `./test-entry.js`.
 

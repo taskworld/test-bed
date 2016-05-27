@@ -71,6 +71,19 @@ module.exports = function createServer (config) {
       errors
     })
 
+    io.on('connection', function (socket) {
+      socket.on('coverage', function (coverageData) {
+        const istanbul = require('istanbul')
+        const collector = new istanbul.Collector()
+        const reporter = new istanbul.Reporter()
+        collector.add(coverageData)
+        reporter.add('lcovonly')
+        reporter.write(collector, false, function () {
+          // saved coverage report!!!
+        })
+      })
+    })
+
     function calculateAffectedModuleIds (modules) {
       const visited = { }
       const affectedModuleIds = [ ]

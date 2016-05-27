@@ -58,7 +58,7 @@ window.TestBed = (function () {
     throw new Error(message)
   }
 
-  window.TestBedSocket.on('compiled', (result) => {
+  window.TestBedSocket.on('compiled', function (result) {
     if (result.errors.length > 0) {
       overlay.showProblems('errors', result.errors)
     } else {
@@ -98,6 +98,9 @@ window.TestBed = (function () {
         promise.then(
           function () {
             updateStatus('ran ' + filesStatString)
+            if (window.__coverage__) {
+              sendCoverageReport(window.__coverage__)
+            }
           },
           function (e) {
             updateStatus('finished test with error: ' + String(e))
@@ -108,7 +111,7 @@ window.TestBed = (function () {
       function getSpecFilesFromContext (context) {
         var files = [ ]
         context.keys().forEach(function (key) {
-          files.push({ name: key, fn: () => context(key), id: context.resolve(key) })
+          files.push({ name: key, fn: function () { context(key) }, id: context.resolve(key) })
         })
         return files
       }
@@ -127,6 +130,10 @@ window.TestBed = (function () {
         link.textContent = 'run all'
         link.onclick = onClick
         document.getElementById('testbed-actions').appendChild(link)
+      }
+
+      function sendCoverageReport (rawCoverageData) {
+        window.TestBedSocket.emit('coverage', rawCoverageData)
       }
     }
   }
