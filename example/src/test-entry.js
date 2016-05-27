@@ -17,14 +17,9 @@
 }
 
 // Setup TestBed
-TestBed.setup({
-  run () {
+TestBed.run({
+  context: require.context('.', true, /\.spec\.js$/),
+  runTests () {
     mocha.run()
   }
-})
-
-// Send test context to TestBed and enable hot reloading
-TestBed.receiveContext(require('./test-context'))
-module.hot.accept('./test-context', function () {
-  TestBed.receiveContext(require('./test-context'))
 })

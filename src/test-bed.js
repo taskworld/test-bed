@@ -1,9 +1,7 @@
 require('!!style-loader!raw-loader!./test-bed.css')
-require('!!webpack-hot-middleware/client?reload')
+const overlay = require('webpack-hot-middleware/client-overlay')
 
 window.TestBed = (function () {
-  var _cache
-  var _run
   var status = document.querySelector('#testbed-status')
 
   var maybeFrame = (function () {
@@ -25,61 +23,29 @@ window.TestBed = (function () {
     if (f) f(status)
   }
 
-  function saveCache (files) {
-    var cache = { }
-    files.forEach(function (file) {
-      cache[file.name] = file.fn
-    })
-    _cache = cache
-  }
-
-  function go (files) {
-    if (_cache) {
-      var changedFiles = files.filter(function (file) {
-        return _cache[file.name] !== file.fn
-      })
-      updateStatus('received ' + changedFiles.length + ' changed files.')
-      rerun(changedFiles)
-    } else {
-      saveCache(files)
-      updateStatus('received ' + files.length + ' files.')
-      var filteredFiles = filterFiles(files)
-      requireFile(filteredFiles, 0, function () {
-        updateStatus('ran ' + filteredFiles.length + (filteredFiles.length < files.length ? ' affected' : '') + ' spec files. ', function (el) {
-          if (filteredFiles.length < files.length) {
-            var link = document.createElement('a')
-            link.href = 'javascript://runAll'
-            link.textContent = 'run all'
-            link.onclick = function () {
-              window.sessionStorage.testFiles = ''
-              window.location.reload()
-            }
-            el.appendChild(link)
+  function loadTestFiles (files, affectedModuleIds, runTests) {
+    updateStatus('received ' + files.length + ' files.')
+    var filteredFiles = filterFiles(files, affectedModuleIds)
+    requireFile(filteredFiles, 0, function () {
+      updateStatus('ran ' + filteredFiles.length + (filteredFiles.length < files.length ? ' affected' : '') + ' spec files. ', function (el) {
+        if (filteredFiles.length < files.length) {
+          var link = document.createElement('a')
+          link.href = 'javascript://runAll'
+          link.textContent = 'run all'
+          link.onclick = function () {
+            window.sessionStorage.testFiles = ''
+            window.location.reload()
           }
-        })
-        if (_run) {
-          _run()
-        } else {
-          error('Not properly setup. Please call TestBed.setup().')
+          el.appendChild(link)
         }
       })
-    }
+      runTests()
+    })
   }
 
-  function rerun (files) {
-    var nextFiles = (files.map(function (file) {
-      return file.name
-    }).join(';;'))
-    window.sessionStorage.testFiles = nextFiles
-    window.location.reload()
-  }
-
-  function filterFiles (files) {
-    var filter = window.sessionStorage.testFiles || ''
-    if (!filter) return files
-    var applicable = filter.split(';;')
+  function filterFiles (files, affectedModuleIds) {
     var filteredFiles = files.filter(function (file) {
-      return applicable.indexOf(file.name) >= 0
+      return affectedModuleIds.indexOf(file.id) >= 0
     })
     return filteredFiles.length ? filteredFiles : files
   }
@@ -109,20 +75,46 @@ window.TestBed = (function () {
     throw new Error(message)
   }
 
+  window.TestBedSocket.on('compiled', (result) => {
+    if (result.errors.length > 0) {
+      overlay.showProblems('errors', result.errors)
+    } else {
+      window.sessionStorage.TestBedWebpackCompileResult = JSON.stringify(result)
+      window.location.reload()
+    }
+  })
+
   return {
-    setup: function (options) {
-      if (typeof options.run !== 'function') {
-        error('Required: options.run')
+    run: function (options) {
+      if (typeof options.runTests !== 'function') {
+        error('Required: options.runTests')
       }
-      _run = options.run
-    },
-    receiveContext: function (context) {
-      console.log('Receiving context...', context)
-      var files = [ ]
-      context.keys().forEach(function (key) {
-        files.push({ name: key, fn: context(key) })
+      if (typeof options.context !== 'function') {
+        error('Required: options.context')
+      }
+
+      var files = getSpecFilesFromContext(options.context)
+      var affectedModuleIds = getAffectedModuleIdsFromLastRun()
+
+      loadTestFiles(files, affectedModuleIds, () => {
+        options.runTests()
       })
-      go(files)
+
+      function getSpecFilesFromContext (context) {
+        var files = [ ]
+        context.keys().forEach(function (key) {
+          files.push({ name: key, fn: () => context(key), id: context.resolve(key) })
+        })
+        return files
+      }
+
+      function getAffectedModuleIdsFromLastRun () {
+        const lastRunResult = (function () {
+          try { return JSON.parse(window.sessionStorage.TestBedWebpackCompileResult) } catch (e) { return null }
+        })()
+        if (!lastRunResult) return [ ]
+        return lastRunResult.affectedModuleIds || [ ]
+      }
     }
   }
 })()

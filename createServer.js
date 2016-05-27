@@ -1,18 +1,17 @@
 #!/usr/bin/env node
 'use strict'
 
+const path = require('path')
+
 function createCompiler (inConfig) {
   const webpack = require('webpack')
-  const path = require('path')
   const config = Object.assign({ }, inConfig)
 
   const OccurrenceOrderPlugin = webpack.optimize.OccurrenceOrderPlugin
-  const HotModuleReplacementPlugin = webpack.HotModuleReplacementPlugin
   const NoErrorsPlugin = webpack.NoErrorsPlugin
   const plugins = (config.plugins || [ ]).slice()
 
   ensurePlugin(OccurrenceOrderPlugin)
-  ensurePlugin(HotModuleReplacementPlugin)
   ensurePlugin(NoErrorsPlugin)
 
   if (typeof config.entry !== 'string') {
@@ -53,7 +52,7 @@ module.exports = function createServer (config) {
   const io = require('socket.io')(server)
   const compiler = createCompiler(config)
 
-  app.use(express.static(__dirname + '/static'))
+  app.use(express.static(path.resolve(__dirname, 'static')))
 
   app.use(require('webpack-dev-middleware')(compiler, {
     noInfo: true,
@@ -61,7 +60,45 @@ module.exports = function createServer (config) {
     stats: { colors: true }
   }))
 
-  app.use(require('webpack-hot-middleware')(compiler))
+  compiler.plugin('done', function (stats) {
+    const compilation = stats.compilation
+    const builtModules = findBuiltModules()
+    const affectedModuleIds = calculateAffectedModuleIds(builtModules)
+    const errors = stats.toJson().errors || [ ]
+
+    io.emit('compiled', {
+      affectedModuleIds,
+      errors
+    })
+
+    function calculateAffectedModuleIds (modules) {
+      const visited = { }
+      const affectedModuleIds = [ ]
+      for (const moduleToTraverse of modules) {
+        traverse(moduleToTraverse)
+      }
+      return affectedModuleIds
+      function traverse (moduleToTraverse) {
+        const id = moduleToTraverse.id
+        if (visited[id]) return
+        visited[id] = true
+        affectedModuleIds.push(id)
+        const parents = (moduleToTraverse.reasons
+          .filter(reason => reason.dependency && reason.module)
+          .map(reason => reason.module)
+        )
+        for (const parent of parents) traverse(parent)
+      }
+    }
+
+    function findBuiltModules () {
+      const built = [ ]
+      for (const chunk of compilation.chunks) {
+        built.push(...chunk.modules.filter(module => module.built))
+      }
+      return built
+    }
+  })
 
   return server
 }

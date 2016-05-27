@@ -21,13 +21,11 @@ It binds a web server on port 9011 and shows you the test result.
 
 Powered by `webpack-dev-middleware`, your bundle files are served from memory. No disk writes!
 
-Powered by `webpack-hot-middleware`, your tests will be re-run when you save files.
-
-Powered by Hot Module Replacement, test-bed will re-execute only the changed files.
+test-bed integrates closely with webpack. Because of this, it can track dependencies between modules, and will re-execute only the changed files.
 
 <p align="center"><img src="http://i.imgur.com/CN5OfY1.png" width="836" /></p>
 
-Also powered by `webpack-hot-middleware`, an overlay will be displayed when there is a bundler error.
+Powered by `webpack-hot-middleware`, an overlay will be displayed when there is a bundler error.
 
 <p align="center"><img src="http://i.imgur.com/3vFd6TM.png" width="836" /></p>
 
@@ -51,7 +49,7 @@ We’ve been using Karma with webpack, and there are some pain points:
 
     - `entry` should be set to the test entry file. For example, `./test-entry.js`.
 
-2. Create a test entry file, which sets up the testing environment and sends the test context:
+2. Create a test entry file, which sets up the testing environment and sends the test context to TestBed:
 
     ```js
     // ./test-entry.js
@@ -64,30 +62,20 @@ We’ve been using Karma with webpack, and there are some pain points:
     require('!!style!raw!mocha/mocha.css')
     mocha.setup({ ui: 'bdd' })
 
-    // Tell TestBed how to run your tests:
-    TestBed.setup({
-      run () {
+    // Run test-bed and send a webpack context.
+    TestBed.run({
+      // Specify the test context: https://webpack.github.io/docs/context.html
+      context: require.context(
+        './src',        // ← Look for test files inside `src` directory.
+        true,           // ← Recurse into subdirectories.
+        /\.spec\.js$/   // ← Only consider files ending in `.spec.js`.
+      ),
+
+      // This file will be run when all test files are loaded.
+      runTests () {
         mocha.run()
       }
     })
-
-    // Send test context to TestBed and enable hot reloading
-    TestBed.receiveContext(require('./test-context'))
-    module.hot.accept('./test-context', function () {
-      TestBed.receiveContext(require('./test-context'))
-    })
     ```
 
-3. Create a test context file, which exports a require context for the test. Pass the modules through `test-bed/thunk-loader` when creating the context.
-
-    ```js
-    // ./test-context
-
-    module.exports = require.context(
-      'test-bed/thunk-loader!./src',
-      true,
-      /\.spec\.js$/
-    )
-    ```
-
-4. Run `test-bed`.
+3. Run `test-bed` and go to `http://localhost:9011/`
