@@ -1,3 +1,6 @@
+require('!!style-loader!raw-loader!./test-bed.css')
+require('!!webpack-hot-middleware/client?reload')
+
 window.TestBed = (function () {
   var _cache
   var _run

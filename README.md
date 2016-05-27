@@ -60,8 +60,8 @@ We’ve been using Karma with webpack, and there are some pain points:
     const mochaElement = document.createElement('div')
     mochaElement.id = 'mocha'
     document.body.appendChild(mochaElement)
-    require('script!mocha/mocha.js')
-    require('style!css!mocha/mocha.css')
+    require('!!script!mocha/mocha.js')
+    require('!!style!raw!mocha/mocha.css')
     mocha.setup({ ui: 'bdd' })
 
     // Tell TestBed how to run your tests:
@@ -84,7 +84,7 @@ We’ve been using Karma with webpack, and there are some pain points:
     // ./test-context
 
     module.exports = require.context(
-      'test-bed/thunk-loader!src',
+      'test-bed/thunk-loader!./src',
       true,
       /\.spec\.js$/
     )

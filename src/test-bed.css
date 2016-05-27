@@ -5,11 +5,11 @@ body {
 
 #testbed {
   font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
-  background: #38A2A9;
   height: 70px;
 }
 
 #testbed-sticky {
+  background: #38A2A9;
   height: 30px;
   position: fixed;
   top: 0; right: 0; left: 0;

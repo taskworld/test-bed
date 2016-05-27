@@ -20,8 +20,8 @@ function createCompiler (inConfig) {
   }
 
   config.entry = [
-    config.entry,
-    require.resolve('webpack-hot-middleware/client')
+    '!!' + require.resolve('./src/test-bed'),
+    config.entry
   ]
 
   if (config.output) {
