@@ -103,9 +103,7 @@ For running in CI servers, we use Karma which works perfectly fine!
 
   <p align="center"><img src="http://i.imgur.com/WBbVQ8F.png" width="700" /></p>
 
-  Notice the “context module.” [It is created when you use `require.context()`](https://webpack.github.io/docs/context.html#require-context). This allows you to require files in bulk, and also allows you to use expressions in require statements ([webpack creates a context module automatically](https://webpack.github.io/docs/context.html#dynamic-requires)).
-
-  (Another note: There is a dashed line from test-bed runtime to the context module, because the test entry sent the context module to the runtime (via `TestBed.run({ context: ... })`).)
+  Notice the “context module.” [It is created when you use `require.context()`](https://webpack.github.io/docs/context.html#require-context). This allows you to require files in bulk. Note that there is a dashed line from test-bed runtime to the context module, because the test entry sent the context module to the runtime via `TestBed.run({ context: ... })`.
 
   It also contains other useful information, such as the list of modules names inside this context and the corresponding “module IDs,” summarized in a table below. 
 
