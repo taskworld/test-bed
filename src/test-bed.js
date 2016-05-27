@@ -1,4 +1,3 @@
-require('!!style-loader!raw-loader!./test-bed.css')
 const overlay = require('webpack-hot-middleware/client-overlay')
 
 window.TestBed = (function () {
