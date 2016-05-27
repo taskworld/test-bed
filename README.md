@@ -54,13 +54,13 @@ For running in CI servers, we use Karma which works perfectly fine!
 
 ## How to use it?
 
-1. Install test-bed.
+1. Install test-bed. (Note: Please use Node 6.)
 
     ```
     npm install --save-dev test-bed
     ```
 
-2. Create a `webpack.config.test-bed.js` with your webpack configuration.
+2. Create a `webpack.config.test-bed.js` file with your webpack configuration.
 
     - `entry` should be set to the test entry file. For example, `./test-entry.js`.
 
