@@ -140,9 +140,9 @@ For running in CI servers, we use Karma which works perfectly fine!
 As our application grows, we notice that our test starts running slower and slower.
 __We found out that in our React component tests, we mounted the component but didn’t unmount it!__
 
-This causes hundreds of components that connects to a several legacy global stores to re-render itself, which slows each test down by ~0.5 seconds.
+This causes hundreds of components that connects to a several legacy global stores to re-render itself whenever the store triggers. This slows the store’s unit tests drastically — by about ~0.5 seconds per test.
 
-The solution? We monkey-patched ReactDOM so that we can keep track of all the mounted instance, and unmount them all before starting the next test. This also forces to keep all tests isolated.
+The solution? We monkey-patched ReactDOM so that we can keep track of all the mounted component instances, then we unmount them all before starting the next test. This also forces us to keep all tests isolated.
 
 ```js
 // spec-helper.js
