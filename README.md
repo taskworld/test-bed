@@ -79,10 +79,9 @@ For running in CI servers, we use Karma which works perfectly fine!
         /\.spec\.js$/   // ← Only consider files ending in `.spec.js`.
       ),
 
-      // This file will be run when all test files are loaded.
-      runTests () {
-        mocha.run()
-      }
+      // This function will be run when all test files are loaded.
+      // It should return a promise that resolves when tests finish.
+      runTests: () => new Promise((resolve) => mocha.run(resolve))
     })
     ```
 
