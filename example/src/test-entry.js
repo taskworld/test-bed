@@ -20,6 +20,24 @@
 TestBed.run({
   context: require.context('.', true, /\.spec\.js$/),
   runTests: () => new Promise((resolve, reject) => {
-    mocha.run((err) => resolve())
-  })
+    const runner = mocha.run((err) => resolve())
+    let _testing = false
+    runner.on('test', function (test) {
+      _testing = true
+      TestBed.testStarted(test.fullTitle())
+    })
+    runner.on('test end', function (test) {
+      if (!_testing) return
+      _testing = false
+      TestBed.testEnded(test.fullTitle())
+    })
+  }),
+  wrapRequire (key, doRequire) {
+    describe(key, function () {
+      before(function () {
+        TestBed.fileStarted(key)
+      })
+      doRequire()
+    })
+  }
 })

@@ -2,6 +2,7 @@
 'use strict'
 
 const path = require('path')
+const createCoverageSaver = require('./createCoverageSaver')
 
 function createCompiler (inConfig) {
   const webpack = require('webpack')
@@ -51,6 +52,7 @@ module.exports = function createServer (config) {
   const server = require('http').createServer(app)
   const io = require('socket.io')(server)
   const compiler = createCompiler(config)
+  const coverageSaver = createCoverageSaver()
 
   app.use(express.static(path.resolve(__dirname, 'static')))
 
@@ -72,15 +74,8 @@ module.exports = function createServer (config) {
     })
 
     io.on('connection', function (socket) {
-      socket.on('coverage', function (coverageData) {
-        const istanbul = require('istanbul')
-        const collector = new istanbul.Collector()
-        const reporter = new istanbul.Reporter()
-        collector.add(coverageData)
-        reporter.add('lcovonly')
-        reporter.write(collector, false, function () {
-          // saved coverage report!!!
-        })
+      socket.on('coverage', function (report) {
+        coverageSaver.receiveReport(report)
       })
     })
 

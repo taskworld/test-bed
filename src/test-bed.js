@@ -1,4 +1,5 @@
 const overlay = require('webpack-hot-middleware/client-overlay')
+const coverageCollector = require('./coverageCollector')
 
 window.TestBed = (function () {
   var status = document.querySelector('#testbed-status')
@@ -75,6 +76,9 @@ window.TestBed = (function () {
       if (typeof options.context !== 'function') {
         error('Required: options.context')
       }
+      var wrapRequire = options.wrapRequire || function (name, doRequire) {
+        doRequire()
+      }
 
       var files = getSpecFilesFromContext(options.context)
       var affectedModuleIds = getAffectedModuleIdsFromLastRun()
@@ -98,9 +102,7 @@ window.TestBed = (function () {
         promise.then(
           function () {
             updateStatus('ran ' + filesStatString)
-            if (window.__coverage__) {
-              sendCoverageReport(window.__coverage__)
-            }
+            sendCoverageReport()
           },
           function (e) {
             updateStatus('finished test with error: ' + String(e))
@@ -111,7 +113,15 @@ window.TestBed = (function () {
       function getSpecFilesFromContext (context) {
         var files = [ ]
         context.keys().forEach(function (key) {
-          files.push({ name: key, fn: function () { context(key) }, id: context.resolve(key) })
+          files.push({
+            name: key,
+            fn: function () {
+              wrapRequire(key, function () {
+                context(key)
+              })
+            },
+            id: context.resolve(key)
+          })
         })
         return files
       }
@@ -132,9 +142,29 @@ window.TestBed = (function () {
         document.getElementById('testbed-actions').appendChild(link)
       }
 
-      function sendCoverageReport (rawCoverageData) {
-        window.TestBedSocket.emit('coverage', rawCoverageData)
+      function sendCoverageReport () {
+        var collectedData = coverageCollector.finalizeAndReturnCollectedCoverageData()
+        window.TestBedSocket.emit('coverage', {
+          files: files.map(function (file) { return file.name }),
+          collectedData: collectedData
+        })
       }
+    },
+
+    fileStarted: function (key) {
+      coverageCollector.fileStarted(key)
+    },
+
+    fileEnded: function (key) {
+      coverageCollector.fileEnded(key)
+    },
+
+    testStarted: function (key) {
+      coverageCollector.testStarted(key)
+    },
+
+    testEnded: function (key) {
+      coverageCollector.testEnded(key)
     }
   }
 })()
