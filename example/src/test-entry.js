@@ -6,7 +6,7 @@ TestBedMocha.setup()
 // Setup power-assert
 global.assert = require('power-assert')
 
-// Setup TestBed
+// Run the tests
 TestBedMocha.run({
   context: require.context('.', true, /\.spec\.js$/)
 })
