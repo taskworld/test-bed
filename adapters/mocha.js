@@ -10,8 +10,8 @@ exports.setup = function (options) {
   document.body.appendChild(mochaElement)
 
   // Require browser version of Mocha.
-  require('script!mocha/mocha.js')
-  require('style!raw!mocha/mocha.css')
+  require('!!script!mocha/mocha.js')
+  require('!!style!raw!mocha/mocha.css')
 
   // Set up the interfaces.
   mocha.setup(options)
