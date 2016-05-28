@@ -5,6 +5,7 @@ const path = require('path')
 const createCoverageSaver = require('./createCoverageSaver')
 
 function createCompiler (inConfig) {
+  const debug = require('debug')('test-bed:compiler')
   const webpack = require('webpack')
   const config = Object.assign({ }, inConfig)
 
@@ -38,7 +39,10 @@ function createCompiler (inConfig) {
   config.plugins = plugins
 
   function ensurePlugin (Plugin) {
-    if (!plugins.some(plugin => plugin instanceof Plugin)) {
+    if (plugins.some(plugin => plugin instanceof Plugin)) {
+      debug('%s already exists in webpack configuration, skipping.', Plugin.name)
+    } else {
+      debug('Adding %s to configuration.', Plugin.name)
       plugins.push(new Plugin())
     }
   }
@@ -47,6 +51,7 @@ function createCompiler (inConfig) {
 }
 
 module.exports = function createServer (config) {
+  const debug = require('debug')('test-bed:server')
   const express = require('express')
   const app = express()
   const server = require('http').createServer(app)
@@ -67,6 +72,8 @@ module.exports = function createServer (config) {
     const builtModules = findBuiltModules()
     const affectedModuleIds = calculateAffectedModuleIds(builtModules)
     const errors = stats.toJson().errors || [ ]
+    debug('Built modules: %o', builtModules.map(builtModule => builtModule.id))
+    debug('Affected modules: %o', affectedModuleIds)
 
     io.emit('compiled', {
       affectedModuleIds,

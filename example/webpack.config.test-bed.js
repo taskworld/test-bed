@@ -6,6 +6,12 @@ process.env.BABEL_ENV = 'test'
 
 module.exports = {
   entry: './src/test-entry.js',
+  resolve: {
+    alias: {
+      'test-bed$': path.resolve(__dirname, '../src/test-bed.js'),
+      'test-bed': path.resolve(__dirname, '..')
+    }
+  },
   module: {
     loaders: [
       {

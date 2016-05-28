@@ -1,7 +1,7 @@
 const overlay = require('webpack-hot-middleware/client-overlay')
 const coverageCollector = require('./coverageCollector')
 
-window.TestBed = (function () {
+module.exports = (function () {
   var status = document.querySelector('#testbed-status')
 
   var maybeFrame = (function () {
