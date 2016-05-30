@@ -2,23 +2,24 @@ var _currentFile = '(runtime)'
 var _currentTest = '(runtime)'
 var _snapshots = { }
 
-function takeCoverageDataSnapshot (coverageData) {
+// NOTE: Optimized performance for hot code path.
+//
+// This function is quite complicated because it takes coverage
+// data snapshot AND clears it in one go, because for many files
+// doing these steps separately is slow and can add ~16ms per test.
+//
+function takeCoverageDataSnapshotAndClearData (coverageData) {
   var snapshot = { }
   var _empty = true
   for (var fileName in coverageData) {
     if (!isFileCoverageEmpty(coverageData[fileName])) {
       snapshot[fileName] = JSON.parse(JSON.stringify(coverageData[fileName]))
+      clearCoverageFileData(coverageData[fileName])
       _empty = false
     }
   }
   if (_empty) return null
   return snapshot
-}
-
-function clearCoverageData (coverageData) {
-  for (var fileName in coverageData) {
-    clearCoverageFileData(coverageData[fileName])
-  }
 }
 
 function clearCoverageFileData (fileData) {
@@ -28,7 +29,7 @@ function clearCoverageFileData (fileData) {
   }
   for (id in fileData.b) {
     var a = fileData.b[id]
-    for (var i = 0; i < a.length; i++) a[i] = 0
+    for (var i = 0, l = a.length; i < l; i++) a[i] = 0
   }
   for (id in fileData.f) {
     fileData.f[id] = 0
@@ -61,9 +62,8 @@ function createCoverageDataHandler (f) {
 
 var doSwitch = createCoverageDataHandler(function (coverageData) {
   return function (file, test) {
-    var snapshot = takeCoverageDataSnapshot(coverageData)
+    var snapshot = takeCoverageDataSnapshotAndClearData(coverageData)
     if (snapshot) {
-      clearCoverageData(coverageData)
       var storage = _snapshots[_currentFile] || (_snapshots[_currentFile] = [ ])
       var newData = { test: _currentTest, snapshot: snapshot }
       storage.push(newData)
@@ -83,11 +83,13 @@ exports.fileEnded = function () {
 }
 
 exports.testStarted = function (testName) {
-  doSwitch(_currentFile, testName)
+  // XXX: Disabled per-test coverage capturing due to unacceptable performance penalty for now.
+  // doSwitch(_currentFile, testName)
 }
 
 exports.testEnded = function () {
-  doSwitch(_currentFile, '(runtime)')
+  // XXX: Disabled per-test coverage capturing due to unacceptable performance penalty for now.
+  // doSwitch(_currentFile, '(runtime)')
 }
 
 exports.finalizeAndReturnCollectedCoverageData = function () {
