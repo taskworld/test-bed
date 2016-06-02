@@ -89,7 +89,7 @@ module.exports = function createServer (config) {
     function calculateAffectedModuleIds (modules) {
       const visited = { }
       const affectedModuleIds = [ ]
-      for (const moduleToTraverse of modules) {
+      for (let moduleToTraverse of modules) {
         traverse(moduleToTraverse)
       }
       return affectedModuleIds
@@ -102,14 +102,14 @@ module.exports = function createServer (config) {
           .filter(reason => reason.dependency && reason.module)
           .map(reason => reason.module)
         )
-        for (const parent of parents) traverse(parent)
+        for (let parent of parents) traverse(parent)
       }
     }
 
     function findBuiltModules () {
       const built = [ ]
-      for (const chunk of compilation.chunks) {
-        built.push(...chunk.modules.filter(module => module.built))
+      for (let chunk of compilation.chunks) {
+        built.push.apply(built, chunk.modules.filter(module => module.built))
       }
       return built
     }
