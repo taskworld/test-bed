@@ -30,19 +30,8 @@ module.exports = function createCoverageSaver () {
   }
 
   function writeCoverageReport () {
-    const istanbul = require('istanbul')
-    const collector = new istanbul.Collector()
-    const reporter = new istanbul.Reporter()
-    for (const key of Object.keys(cache)) {
-      for (const entry of cache[key]) {
-        debug('Adding coverage data of %s -> %s', key, entry.test)
-        collector.add(entry.snapshot)
-      }
-    }
-    reporter.add('lcovonly')
-    reporter.write(collector, false, function () {
-      // saved coverage report!!!
-    })
+    const reportWriter = require('child_process').fork(require.resolve('./coverageReportWriter'))
+    reportWriter.send(cache)
   }
 
   return { receiveReport }

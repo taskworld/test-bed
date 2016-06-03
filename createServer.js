@@ -52,6 +52,7 @@ function createCompiler (inConfig) {
 
 module.exports = function createServer (config) {
   const debug = require('debug')('test-bed:server')
+  const debugSocket = require('debug')('test-bed:socket')
   const express = require('express')
   const app = express()
   const server = require('http').createServer(app)
@@ -67,6 +68,20 @@ module.exports = function createServer (config) {
     stats: { colors: true }
   }))
 
+  io.on('connection', function (socket) {
+    debugSocket('Client connected')
+    function saveCoverage (report) {
+      coverageSaver.receiveReport(report)
+    }
+    function onDisconnected () {
+      socket.removeListener('coverage', saveCoverage)
+      socket.removeListener('disconnect', onDisconnected)
+      debugSocket('Client disconnected')
+    }
+    socket.on('coverage', saveCoverage)
+    socket.on('disconnect', onDisconnected)
+  })
+
   compiler.plugin('done', function (stats) {
     const compilation = stats.compilation
     const builtModules = findBuiltModules()
@@ -78,16 +93,6 @@ module.exports = function createServer (config) {
     io.emit('compiled', {
       affectedModuleIds,
       errors
-    })
-
-    io.on('connection', function (socket) {
-      function saveCoverage (report) {
-        coverageSaver.receiveReport(report)
-      }
-      socket.on('coverage', saveCoverage)
-      socket.on('disconnect', function () {
-        socket.removeListener('coverage', saveCoverage)
-      })
     })
 
     function calculateAffectedModuleIds (modules) {
