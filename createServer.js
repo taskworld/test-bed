@@ -81,8 +81,12 @@ module.exports = function createServer (config) {
     })
 
     io.on('connection', function (socket) {
-      socket.on('coverage', function (report) {
+      function saveCoverage (report) {
         coverageSaver.receiveReport(report)
+      }
+      socket.on('coverage', saveCoverage)
+      socket.on('disconnect', function () {
+        socket.removeListener('coverage', saveCoverage)
       })
     })
 
