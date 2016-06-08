@@ -10,6 +10,13 @@ For that purpose, you should use something like Karma.
 (We use both: test-bed for TDD, Karma for CI)
 
 
+## Notes: [v0.4.0](https://github.com/taskworld/test-bed/releases/tag/v0.4.0) breaking changes
+
+If you are using `test-bed` before v0.4.0, upgrading to v0.4.0 requires a few changes in your test entry file.
+It becomes much simpler!
+Please see the new test entry file format in the [How to use it?](#how-to-use-it) section below.
+
+
 ## Overview
 
 Once test-bed is set up, you can run it by invoking `./node_modules/.bin/test-bed`.
