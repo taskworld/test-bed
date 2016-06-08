@@ -2,8 +2,10 @@
 'use strict'
 
 const path = require('path')
+const createCoverageSaver = require('./createCoverageSaver')
 
 function createCompiler (inConfig) {
+  const debug = require('debug')('test-bed:compiler')
   const webpack = require('webpack')
   const config = Object.assign({ }, inConfig)
 
@@ -37,7 +39,10 @@ function createCompiler (inConfig) {
   config.plugins = plugins
 
   function ensurePlugin (Plugin) {
-    if (!plugins.some(plugin => plugin instanceof Plugin)) {
+    if (plugins.some(plugin => plugin instanceof Plugin)) {
+      debug('%s already exists in webpack configuration, skipping.', Plugin.name)
+    } else {
+      debug('Adding %s to configuration.', Plugin.name)
       plugins.push(new Plugin())
     }
   }
@@ -46,11 +51,14 @@ function createCompiler (inConfig) {
 }
 
 module.exports = function createServer (config) {
+  const debug = require('debug')('test-bed:server')
+  const debugSocket = require('debug')('test-bed:socket')
   const express = require('express')
   const app = express()
   const server = require('http').createServer(app)
   const io = require('socket.io')(server)
   const compiler = createCompiler(config)
+  const coverageSaver = createCoverageSaver()
 
   app.use(express.static(path.resolve(__dirname, 'static')))
 
@@ -60,28 +68,31 @@ module.exports = function createServer (config) {
     stats: { colors: true }
   }))
 
+  io.on('connection', function (socket) {
+    debugSocket('Client connected')
+    function saveCoverage (report) {
+      coverageSaver.receiveReport(report)
+    }
+    function onDisconnected () {
+      socket.removeListener('coverage', saveCoverage)
+      socket.removeListener('disconnect', onDisconnected)
+      debugSocket('Client disconnected')
+    }
+    socket.on('coverage', saveCoverage)
+    socket.on('disconnect', onDisconnected)
+  })
+
   compiler.plugin('done', function (stats) {
     const compilation = stats.compilation
     const builtModules = findBuiltModules()
     const affectedModuleIds = calculateAffectedModuleIds(builtModules)
     const errors = stats.toJson().errors || [ ]
+    debug('Built modules: %o', builtModules.map(builtModule => builtModule.id))
+    debug('Affected modules: %o', affectedModuleIds)
 
     io.emit('compiled', {
       affectedModuleIds,
       errors
-    })
-
-    io.on('connection', function (socket) {
-      socket.on('coverage', function (coverageData) {
-        const istanbul = require('istanbul')
-        const collector = new istanbul.Collector()
-        const reporter = new istanbul.Reporter()
-        collector.add(coverageData)
-        reporter.add('lcovonly')
-        reporter.write(collector, false, function () {
-          // saved coverage report!!!
-        })
-      })
     })
 
     function calculateAffectedModuleIds (modules) {

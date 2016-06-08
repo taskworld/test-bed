@@ -68,27 +68,27 @@ For running in CI servers, we use Karma which works perfectly fine!
 
     ```js
     // ./test-entry.js
+    // This example assumes you are using Mocha test framework,
+    // but test-bed should work with any browser-based test framework,
+    // as long as it exposes the necessary hooks.
 
-    // Set up your test environment here, e.g. include Mocha.
-    const mochaElement = document.createElement('div')
-    mochaElement.id = 'mocha'
-    document.body.appendChild(mochaElement)
-    require('!!script!mocha/mocha.js')
-    require('!!style!raw!mocha/mocha.css')
-    mocha.setup({ ui: 'bdd' })
+    // 1. Set up your test environment. (e.g. mocha, power-assert, chai)
+    //    Let’s use an adapter for mocha.
+    var TestBedMocha = require('test-bed/adapters/mocha')
+    TestBedMocha.setup({ ui: 'bdd' }) // this makes `describe`, `it` available.
 
-    // Run test-bed and send a webpack context.
-    TestBed.run({
+    // 2. Set up your test environment.
+    global.chai = require('chai')
+    global.expect = global.chai.expect
+
+    // 3. Run test-bed, sending the webpack context.
+    TestBedMocha.run({
       // Specify the test context: https://webpack.github.io/docs/context.html
       context: require.context(
         './src',        // ← Look for test files inside `src` directory.
         true,           // ← Recurse into subdirectories.
         /\.spec\.js$/   // ← Only consider files ending in `.spec.js`.
-      ),
-
-      // This function will be run when all test files are loaded.
-      // It should return a promise that resolves when tests finish.
-      runTests: () => new Promise((resolve) => mocha.run(resolve))
+      )
     })
     ```
 
@@ -100,20 +100,20 @@ For running in CI servers, we use Karma which works perfectly fine!
 - First, test-bed fires up webpack-dev-middleware, which puts webpack in watch mode using memory file system.
 
   webpack also builds a module graph.
-  Each module has a unique “ID” number (which can be accessed from client code). 
+  Each module has a unique “ID” number (which can be accessed from client code).
 
   <p align="center"><img src="http://i.imgur.com/WBbVQ8F.png" width="700" /></p>
 
   Notice the “context module.” [It is created when you use `require.context()`](https://webpack.github.io/docs/context.html#require-context). This allows you to require files in bulk. Note that there is a dashed line from test-bed runtime to the context module, because the test entry sent the context module to the runtime via `TestBed.run({ context: ... })`.
 
-  It also contains other useful information, such as the list of modules names inside this context and the corresponding “module IDs,” summarized in a table below. 
+  It also contains other useful information, such as the list of modules names inside this context and the corresponding “module IDs,” summarized in a table below.
 
   <p align="center"><img src="http://i.imgur.com/kgni6zU.png" width="700" /></p>
 
 - Now let’s consider what happens when I changed a module.
 
   <p align="center"><img src="http://i.imgur.com/Gdi5LHc.png" width="700" /></p>
-  
+
   - I edited `add.js`.
 
   - webpack picks up the change and rebuilds the bundle. Only modules that are changed needs to be “rebuilt,” while the rest comes from cache.
@@ -133,6 +133,54 @@ For running in CI servers, we use Karma which works perfectly fine!
 - The runtime looks at the context module, and figures out which files to run. Finally, it requires just the affected test files, and starts the test.
 
   <p align="center"><img src="http://i.imgur.com/JoPVabE.png" width="700" /></p>
+
+
+## Appendix: Client API
+
+test-bed comes with an adapter for Mocha.
+But if you want to integrate test-bed with other test frameworks, you can use the client API directly.
+
+```js
+const TestBed = require('test-bed')
+```
+
+
+### TestBed.run(options)
+
+This function makes test-bed start running... Here are the options:
+
+- `context` Webpack context module that contains the test files. Required.
+
+- `runTests ()` A function that will be called when the tests files finish loading. This function should start running tests, and return a Promise that resolves when the test finished. Required.
+
+- `wrapRequire (key, doRequire)` A function that will be called when test-bed wants to require a test file. This function must be synchronous and call `doRequire()` once. Optional, defaults to `(key, doRequire) => { doRequire() }`.
+
+
+### Coverage measurement functions
+
+test-bed supports code coverage measurement. However, by default, when not all test files are run, the result code code coverage can be inaccurate (until you run all tests again).
+
+To make code coverage more accurate when running subset of tests, test-bed can record test coverage for each test separately. This is handled automatically in mocha adapter.
+
+When using test-bed API directly, you should call these methods to obtain more accurate coverage data:
+
+- #### TestBed.fileStarted(key)
+
+  This function should be called when the test framework is going to run the tests in a test file. Can be called at most once per test file.
+
+- #### TestBed.testStarted(testName)
+
+  This function should be called when the test framework is going to run a test.
+
+- #### TestBed.testEnded()
+
+  This function should be called when the test framework finished running a test.
+
+- #### TestBed.fileEnded()
+
+  This function should be called when the test framework finished executing tests inside a test file.
+
+See mocha adapter source code for example.
 
 
 ## Appendix: How we tripled our test speed with this one weird trick.
