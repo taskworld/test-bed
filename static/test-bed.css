@@ -16,6 +16,14 @@ body {
   padding: 20px;
 }
 
+.testbed-failed#testbed-sticky {
+  background: #eb6053;
+}
+
+.testbed-success#testbed-sticky {
+  background: #43BA54;
+}
+
 #testbed a {
   color: white;
 }

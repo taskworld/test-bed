@@ -3,6 +3,7 @@ const coverageCollector = require('./coverageCollector')
 
 module.exports = (function () {
   var status = document.querySelector('#testbed-status')
+  var sticky = document.querySelector('#testbed-sticky')
 
   var maybeFrame = (function () {
     var _last = 0
@@ -100,9 +101,14 @@ module.exports = (function () {
           return
         }
         promise.then(
-          function () {
+          function (result) {
             updateStatus('ran ' + filesStatString)
             sendCoverageReport()
+            if (result && result.failures) {
+              sticky.className = 'testbed-failed'
+            } else {
+              sticky.className = 'testbed-success'
+            }
           },
           function (e) {
             updateStatus('finished test with error: ' + String(e))

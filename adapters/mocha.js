@@ -1,5 +1,6 @@
 'use strict'
-/* global mocha, describe, before, after */
+/* global mocha, describe */
+require('!!style!raw!./mocha.css')
 
 exports.setup = function (options) {
   options = options || { ui: 'bdd' }
@@ -27,7 +28,9 @@ exports.run = function (options) {
     // This function is called when test-bed finished loading all dependencies.
     runTests: function () {
       return new Promise(function (resolve) {
-        var runner = mocha.run(resolve)
+        var runner = mocha.run(function (failures) {
+          resolve({ failures: +failures })
+        })
         var _testing = false
 
         // Listen to 'test' and 'test end' events and report to test-bed to

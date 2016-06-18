@@ -60,6 +60,11 @@ module.exports = function createServer (config) {
   const compiler = createCompiler(config)
   const coverageSaver = createCoverageSaver()
 
+  // Allow the test-bed app to be configured!
+  if (config.testBed && typeof config.testBed.configureExpressApp === 'function') {
+    config.testBed.configureExpressApp(app, express)
+  }
+
   app.use(express.static(path.resolve(__dirname, 'static')))
 
   app.use(require('webpack-dev-middleware')(compiler, {

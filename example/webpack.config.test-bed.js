@@ -24,5 +24,15 @@ module.exports = {
         loader: 'json'
       }
     ]
+  },
+  testBed: {
+    // Optional! You can use things like `express.static()`.
+    configureExpressApp: function (app, express) {
+      void express
+      app.use(function(req, res, next) {
+        console.log('Request received:', req.url)
+        next()
+      })
+    }
   }
 }
