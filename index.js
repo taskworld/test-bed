@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 'use strict'
 
-const config = require(require('path').resolve(process.cwd(), 'webpack.config.test-bed.js'))
+const configFile = process.argv[2] ? process.argv[2] : 'webpack.config.test-bed.js'
+const config = require(require('path').resolve(process.cwd(), configFile))
 const server = require('./createServer')(config)
 
 server.listen(9011, function () {
