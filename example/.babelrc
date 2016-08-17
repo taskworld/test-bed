@@ -1,1 +1,1 @@
-{ "presets": ["es2015"], "plugins": ["espower"], "env": { "test": { "plugins": [ "__coverage__" ] } } }
+{ "presets": ["es2015"], "plugins": ["espower"], "env": { "test": { "plugins": [  ] } } }

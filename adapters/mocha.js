@@ -52,6 +52,12 @@ exports.run = function (options) {
         runner.on('test end', function (test) {
           if (!_testing) return
           _testing = false
+          if (test.state === 'failed' && test.err) {
+            setTimeout(() => {
+              console.error('%cTest failed:%c %s', 'color: red; font-weight: bold', test.fullTitle)
+              throw test.err
+            })
+          }
           TestBed.testEnded(test.fullTitle())
         })
       })

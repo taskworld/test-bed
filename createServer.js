@@ -31,10 +31,11 @@ function createCompiler (inConfig) {
   config.output = {
     path: path.resolve(process.cwd(), 'build/test-assets'),
     publicPath: '/test-assets/',
-    filename: 'test.bundle.js'
+    filename: 'test.bundle.js',
+    pathinfo: true
   }
 
-  config.devTool = 'cheap-eval-module-source-map'
+  config.devtool = '#cheap-eval-module-source-map'
 
   config.plugins = plugins
 
