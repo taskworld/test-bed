@@ -24,7 +24,8 @@
     "socket.io": "^1.4.6",
     "style-loader": "^0.13.1",
     "webpack-dev-middleware": "^1.6.1",
-    "webpack-hot-middleware": "^2.10.0"
+    "webpack-hot-middleware": "^2.10.0",
+    "yargs": "^5.0.0"
   },
   "devDependencies": {
     "mocha": "^2.5.3",
