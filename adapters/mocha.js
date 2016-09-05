@@ -54,7 +54,7 @@ exports.run = function (options) {
           _testing = false
           if (test.state === 'failed' && test.err) {
             setTimeout(() => {
-              console.error('%cTest failed:%c %s', 'color: red; font-weight: bold', test.fullTitle)
+              console.error('%cTest failed:%c %s', 'color: red; font-weight: bold', '', getTitle(test))
               throw test.err
             })
           }
@@ -77,4 +77,21 @@ exports.run = function (options) {
       })
     }
   })
+}
+
+function getTitle (test) {
+  var titles = [ ]
+  while (test) {
+    if (test.title) {
+      titles.unshift(test.title)
+    }
+    test = test.parent
+  }
+  var prefix = ''
+  var output = ''
+  for (var i = 0; i < titles.length; i++) {
+    prefix += '   '
+    output += '\n' + prefix + '└── ' + titles[i]
+  }
+  return output
 }
