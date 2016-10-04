@@ -11,7 +11,7 @@ const relativeConfigPath = require('yargs')
   })
   .nargs('config', 1)
   .help()
-  .argv.config;
+  .argv.config
 
 const config = require(require('path').resolve(process.cwd(), relativeConfigPath))
 const server = require('./createServer')(config)
