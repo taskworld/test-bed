@@ -71,6 +71,17 @@ For running in CI servers, we use Karma which works perfectly fine!
 
     - `entry` should be set to the test entry file. For example, `./test-entry.js`.
 
+    - optionally set `webpackMiddleware` which will be merged with some default options when we initialize webpack-middleware. This can be useful in case you need to enable polling:
+    ```
+      webpackMiddleware: {
+        watchOptions: {
+          aggregateTimeout: 300,
+          poll: true,
+          ignore: /node_modules/
+        }
+      }
+    ```
+
 3. Create a test entry file, which sets up the testing environment and sends the test context to TestBed:
 
     ```js
@@ -95,16 +106,7 @@ For running in CI servers, we use Karma which works perfectly fine!
         './src',        // ← Look for test files inside `src` directory.
         true,           // ← Recurse into subdirectories.
         /\.spec\.js$/   // ← Only consider files ending in `.spec.js`.
-      ),
-
-      // Optionally, pass options through to webpack-middleware
-      webpackMiddleware: {
-        watchOptions: {
-          aggregateTimeout: 300,
-          poll: true,
-          ignore: /node_modules/
-        }
-      }
+      )
     })
     ```
 
