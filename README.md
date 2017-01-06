@@ -95,7 +95,16 @@ For running in CI servers, we use Karma which works perfectly fine!
         './src',        // ← Look for test files inside `src` directory.
         true,           // ← Recurse into subdirectories.
         /\.spec\.js$/   // ← Only consider files ending in `.spec.js`.
-      )
+      ),
+
+      // Optionally, pass options through to webpack-middleware
+      webpackMiddleware: {
+        watchOptions: {
+          aggregateTimeout: 300,
+          poll: true,
+          ignore: /node_modules/
+        }
+      }
     })
     ```
 
