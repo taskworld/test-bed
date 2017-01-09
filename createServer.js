@@ -73,6 +73,7 @@ module.exports = function createServer (config) {
     publicPath: '/test-assets/',
     stats: { colors: true }
   }, config.webpackMiddleware)))
+  delete config.webpackMiddleware
 
   io.on('connection', function (socket) {
     debugSocket('Client connected')
