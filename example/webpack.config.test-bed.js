@@ -26,10 +26,12 @@ module.exports = {
     ]
   },
   testBed: {
+    // Change this to false or remove this line to prevent your system browser from launching
+    openBrowser: true,
     // Optional! You can use things like `express.static()`.
     configureExpressApp: function (app, express) {
       void express
-      app.use(function(req, res, next) {
+      app.use(function (req, res, next) {
         console.log('Request received:', req.url)
         next()
       })

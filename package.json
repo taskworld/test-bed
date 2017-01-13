@@ -19,6 +19,7 @@
     "debug": "^2.2.0",
     "express": "^4.14.0",
     "istanbul": "^0.4.3",
+    "opn": "^4.0.2",
     "raw-loader": "^0.5.1",
     "script-loader": "^0.7.0",
     "socket.io": "^1.4.6",
