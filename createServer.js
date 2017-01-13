@@ -69,7 +69,7 @@ module.exports = function createServer (config) {
   app.use(express.static(path.resolve(__dirname, 'static')))
 
   app.use(require('webpack-dev-middleware')(compiler, Object.assign({
-    noInfo: true,
+    quiet: true,
     publicPath: '/test-assets/',
     stats: { colors: true }
   }, config.webpackMiddleware)))
