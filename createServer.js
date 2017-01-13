@@ -68,11 +68,12 @@ module.exports = function createServer (config) {
 
   app.use(express.static(path.resolve(__dirname, 'static')))
 
-  app.use(require('webpack-dev-middleware')(compiler, {
+  app.use(require('webpack-dev-middleware')(compiler, Object.assign({
     noInfo: true,
     publicPath: '/test-assets/',
     stats: { colors: true }
-  }))
+  }, config.webpackMiddleware)))
+  delete config.webpackMiddleware
 
   io.on('connection', function (socket) {
     debugSocket('Client connected')
