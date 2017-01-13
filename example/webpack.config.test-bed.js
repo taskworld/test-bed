@@ -25,6 +25,10 @@ module.exports = {
       }
     ]
   },
+  // Override webpack middleware default settings
+  webpackMiddleware: {
+    quiet: false
+  },
   testBed: {
     // Change this to false or remove this line to prevent your system browser from launching
     openBrowser: true,

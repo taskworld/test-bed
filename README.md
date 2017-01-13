@@ -71,17 +71,6 @@ For running in CI servers, we use Karma which works perfectly fine!
 
     - `entry` should be set to the test entry file. For example, `./test-entry.js`.
 
-    - optionally set `webpackMiddleware` which will be merged with some default options when we initialize webpack-middleware. This can be useful in case you need to enable polling:
-    ```
-      webpackMiddleware: {
-        watchOptions: {
-          aggregateTimeout: 300,
-          poll: true,
-          ignore: /node_modules/
-        }
-      }
-    ```
-
 3. Create a test entry file, which sets up the testing environment and sends the test context to TestBed:
 
     ```js
@@ -112,6 +101,65 @@ For running in CI servers, we use Karma which works perfectly fine!
 
 4. Run `./node_modules/.bin/test-bed` and go to `http://localhost:9011/`
 
+## Webpack configuration options
+
+You can change options of the webpack middleware by adding a `webpackMiddleware` entry to `webpack.config.test-bed.js`. 
+The following code will restore the default webpack output and enable polling:
+```
+// webpack.config.test-bed.js
+module.exports = {
+  entry: ./test-entry.js
+  ... // other webpack options
+  webpackMiddleware: {
+    quiet: false,
+    watchOptions: {
+      aggregateTimeout: 300,
+      poll: true,
+      ignore: /node_modules/
+    }
+  }
+}
+```
+
+Furthermore, you can configure test-bed by adding a `testBed` entry to your `webpack.config.test-bed.js`:
+```
+// webpack.config.test-bed.js
+module.exports = {
+  ... // other webpack options
+  testBed: {
+    openBrowser: true
+  }
+}
+```
+
+Available options are:
+- `port: <portNumber>`: Change the port test-bed should use. (default is `port: 9011`)
+
+- `openBrowser: <true/false>`: Determine if test-bed should automatically try to open your systems default browser
+  (default is `openBrowser: false`)
+  
+- `configureExpressApp: <function(app, express)>`: Change the server configuration. The following code will make all
+  files in `test/resources` available under `localhost:9011/base/resources` and log all requests:
+  ```
+  configureExpressApp: function (app, express) {
+                         app.use('/base/resources', express.static('test/resources'))
+                         app.use(function (req, res, next) {
+                           console.log('Request received:', req.url)
+                           next()
+                         })
+                       }
+  ```
+
+
+## Command line options
+
+- `--help`: display available command line options
+- `-b true`, `--browser true`: automatically open test-bed in your systems default browser (can be `true` or `false`,
+  overrides setting in `webpack.config.test-bed.js`)
+- `-c myconfig.js`, `--config myconfig.js`: Use the webpack configuration given in `myconfig.js` instead of
+  `webpack.config.test-bed.js`. Allows you to e.g. use different test contexts with subsets of test.
+- `-p 9876`, `--port 9876`: Use a different port, e.g. `9876`, instead of the default of `9011`. Also overrides any port
+  specified in `webpack.config.test-bed.js`
 
 ## Appendix: How it works...
 
