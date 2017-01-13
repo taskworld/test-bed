@@ -28,6 +28,8 @@ module.exports = {
   testBed: {
     // Change this to false or remove this line to prevent your system browser from launching
     openBrowser: true,
+    // Overrides the default port of 9011
+    port: 9012,
     // Optional! You can use things like `express.static()`.
     configureExpressApp: function (app, express) {
       void express
