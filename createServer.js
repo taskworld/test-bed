@@ -52,6 +52,12 @@ function createCompiler (inConfig) {
 }
 
 module.exports = function createServer (config) {
+  const testBedConfig = config.testBed
+  delete config.testBed
+
+  const webpackMiddlewareConfig = config.webpackMiddleware
+  delete config.webpackMiddleware
+
   const debug = require('debug')('test-bed:server')
   const debugSocket = require('debug')('test-bed:socket')
   const express = require('express')
@@ -62,8 +68,8 @@ module.exports = function createServer (config) {
   const coverageSaver = createCoverageSaver()
 
   // Allow the test-bed app to be configured!
-  if (config.testBed && typeof config.testBed.configureExpressApp === 'function') {
-    config.testBed.configureExpressApp(app, express)
+  if (testBedConfig && typeof testBedConfig.configureExpressApp === 'function') {
+    testBedConfig.configureExpressApp(app, express)
   }
 
   app.use(express.static(path.resolve(__dirname, 'static')))
@@ -72,8 +78,7 @@ module.exports = function createServer (config) {
     quiet: true,
     publicPath: '/test-assets/',
     stats: { colors: true }
-  }, config.webpackMiddleware)))
-  delete config.webpackMiddleware
+  }, webpackMiddlewareConfig || { })))
 
   io.on('connection', function (socket) {
     debugSocket('Client connected')
