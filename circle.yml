@@ -17,4 +17,4 @@ deployment:
     owner: taskworld
     commands:
       - echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
-      - yarn run publish-please
+      - npm run publish
