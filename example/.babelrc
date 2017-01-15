@@ -1,1 +1,1 @@
-{ "presets": ["es2015"], "plugins": ["espower"], "env": { "test": { "plugins": [  ] } } }
+{ "presets": ["es2015"], "plugins": ["espower"], "env": { "test": { "plugins": [ "istanbul" ] } } }

@@ -1,13 +1,11 @@
 {
   "name": "test-bed",
-  "version": "0.7.0",
+  "version": "0.77.77",
   "description": "Development test runner for webpack-based apps. Runs only specs affected by code change. For improved TDD experience!",
   "main": "index.js",
   "webpack": "runtime.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "publish-please": "publish-please",
-    "prepublish": "publish-please guard"
+    "test": "(cd example && yarn) && node e2e-test/test.js"
   },
   "keywords": [],
   "author": "Thai Pangsakulyanont <thai.p@taskworld.com>",
@@ -30,7 +28,7 @@
   },
   "devDependencies": {
     "mocha": "^2.5.3",
-    "publish-please": "^2.1.3",
+    "selenium-webdriver": "^3.0.1",
     "standard": "^7.1.0",
     "webpack": "^2.1.0-beta.7"
   },

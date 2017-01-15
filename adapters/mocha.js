@@ -1,6 +1,6 @@
 'use strict'
 /* global mocha, describe */
-require('!!style!raw!./mocha.css')
+require('!!style-loader!raw-loader!./mocha.css')
 
 exports.setup = function (options) {
   options = options || { ui: 'bdd' }
@@ -11,8 +11,8 @@ exports.setup = function (options) {
   document.body.appendChild(mochaElement)
 
   // Require browser version of Mocha.
-  require('!!script!mocha/mocha.js')
-  require('!!style!raw!mocha/mocha.css')
+  require('!!script-loader!mocha/mocha.js')
+  require('!!style-loader!raw-loader!mocha/mocha.css')
 
   // Set up the interfaces.
   mocha.setup(options)

@@ -1,0 +1,20 @@
+machine:
+  node:
+    version: '6'
+  post:
+    - rm -rf ~/.yarn && (curl -o- -L https://yarnpkg.com/install.sh | bash)
+dependencies:
+  cache_directories:
+    - "~/.yarn-cache"
+  override:
+    - yarn
+test:
+  override:
+    - yarn test
+deployment:
+  npm:
+    tag: /v.*/
+    owner: taskworld
+    commands:
+      - echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+      - npm publish
