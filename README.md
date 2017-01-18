@@ -133,7 +133,8 @@ module.exports = {
 ```
 
 Available options are:
-- `port: <portNumber>`: Change the port test-bed should use. (default is `port: 9011`)
+- `port: <portNumber>`: Change the port test-bed should use. Using a value of `0` tells test-bed to find a free port
+  (default is `port: 9011`)
 
 - `openBrowser: <true/false>`: Determine if test-bed should automatically try to open your systems default browser
   (default is `openBrowser: false`)
@@ -159,7 +160,7 @@ Available options are:
 - `-c myconfig.js`, `--config myconfig.js`: Use the webpack configuration given in `myconfig.js` instead of
   `webpack.config.test-bed.js`. Allows you to e.g. use different test contexts with subsets of test.
 - `-p 9876`, `--port 9876`: Use a different port, e.g. `9876`, instead of the default of `9011`. Also overrides any port
-  specified in `webpack.config.test-bed.js`
+  specified in `webpack.config.test-bed.js`. A value of `0` will tell test-bed to find a free port.
 
 ## Appendix: How it works...
 
