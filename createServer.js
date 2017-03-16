@@ -35,7 +35,7 @@ function createCompiler (inConfig) {
     pathinfo: true
   }
 
-  config.devtool = '#cheap-eval-module-source-map'
+  config.devtool = config.devtool || 'eval'
 
   config.plugins = plugins
 
