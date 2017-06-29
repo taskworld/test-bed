@@ -1,6 +1,6 @@
 {
   "name": "test-bed",
-  "version": "0.77.77",
+  "version": "0.777.7-beta",
   "description": "Development test runner for webpack-based apps. Runs only specs affected by code change. For improved TDD experience!",
   "main": "index.js",
   "webpack": "runtime.js",
