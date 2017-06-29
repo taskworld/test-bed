@@ -66,6 +66,7 @@ module.exports = function createServer (config) {
   const io = require('socket.io')(server)
   const compiler = createCompiler(config)
   const coverageSaver = createCoverageSaver()
+  let lastHash
 
   // Allow the test-bed app to be configured!
   if (testBedConfig && typeof testBedConfig.configureExpressApp === 'function') {
@@ -96,9 +97,15 @@ module.exports = function createServer (config) {
 
   compiler.plugin('done', function (stats) {
     const compilation = stats.compilation
+    const json = stats.toJson()
+    debug('Hash: %s', json.hash)
+    if (lastHash === json.hash) {
+      return
+    }
+    lastHash = json.hash
     const builtModules = findBuiltModules()
     const affectedModuleIds = calculateAffectedModuleIds(builtModules)
-    const errors = stats.toJson().errors || [ ]
+    const errors = json.errors || [ ]
     debug('Built modules: %o', builtModules.map(builtModule => builtModule.id))
     debug('Affected modules: %o', affectedModuleIds)
 
