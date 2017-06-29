@@ -10,13 +10,6 @@ For that purpose, you should use something like Karma.
 (We use both: test-bed for TDD, Karma for CI)
 
 
-## Notes: [v0.4.0](https://github.com/taskworld/test-bed/releases/tag/v0.4.0) breaking changes
-
-If you are using `test-bed` before v0.4.0, upgrading to v0.4.0 requires a few changes in your test entry file.
-It becomes much simpler!
-Please see the new test entry file format in the [How to use it?](#how-to-use-it) section below.
-
-
 ## Overview
 
 Once test-bed is set up, you can run it by invoking `./node_modules/.bin/test-bed`.
@@ -103,7 +96,7 @@ For running in CI servers, we use Karma which works perfectly fine!
 
 ## Webpack configuration options
 
-You can change options of the webpack middleware by adding a `webpackMiddleware` entry to `webpack.config.test-bed.js`. 
+You can change options of the webpack middleware by adding a `webpackMiddleware` entry to `webpack.config.test-bed.js`.
 The following code will restore the default webpack output and enable polling:
 ```
 // webpack.config.test-bed.js
@@ -138,7 +131,7 @@ Available options are:
 
 - `openBrowser: <true/false>`: Determine if test-bed should automatically try to open your systems default browser
   (default is `openBrowser: false`)
-  
+
 - `configureExpressApp: <function(app, express)>`: Change the server configuration. The following code will make all
   files in `test/resources` available under `localhost:9011/base/resources` and log all requests:
   ```
