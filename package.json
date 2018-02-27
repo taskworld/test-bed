@@ -22,8 +22,8 @@
     "script-loader": "^0.7.0",
     "socket.io": "^1.4.6",
     "style-loader": "^0.13.1",
-    "webpack-dev-middleware": "^1.6.1",
-    "webpack-hot-middleware": "^2.10.0",
+    "webpack-dev-middleware": "^2.0.6",
+    "webpack-hot-middleware": "^2.21.0",
     "yargs": "^5.0.0"
   },
   "devDependencies": {
@@ -33,7 +33,7 @@
     "webpack": "^2.1.0-beta.7"
   },
   "peerDependencies": {
-    "webpack": "1 || ^2.1.0-beta.7"
+    "webpack": "^2.0.0 || ^3.0.0 || ^4.0.0"
   },
   "directories": {
     "example": "example"
