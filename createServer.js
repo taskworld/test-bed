@@ -10,11 +10,11 @@ function createCompiler (inConfig) {
   const config = Object.assign({ }, inConfig)
 
   const OccurrenceOrderPlugin = webpack.optimize.OccurrenceOrderPlugin
-  const NoErrorsPlugin = webpack.NoErrorsPlugin
+  const NoEmitOnErrorsPlugin = webpack.NoEmitOnErrorsPlugin
   const plugins = (config.plugins || [ ]).slice()
 
   ensurePlugin(OccurrenceOrderPlugin)
-  ensurePlugin(NoErrorsPlugin)
+  ensurePlugin(NoEmitOnErrorsPlugin)
 
   if (typeof config.entry !== 'string') {
     throw new Error('config.entry should be a string.')
