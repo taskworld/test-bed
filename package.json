@@ -20,7 +20,7 @@
     "opn": "^4.0.2",
     "raw-loader": "^0.5.1",
     "script-loader": "^0.7.0",
-    "socket.io": "^1.4.6",
+    "socket.io": "^2.4.0",
     "style-loader": "^0.13.1",
     "webpack-dev-middleware": "^2.0.6",
     "webpack-hot-middleware": "^2.21.0",
